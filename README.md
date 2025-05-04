@@ -14,7 +14,7 @@ Funktionen
 Nutzung
 -------
 1. Das Repository klonen:
-   git clone https://github.com/diggerwf/CPU-Miner-mit-System-berwachung/blob/main/install_miner.sh
+   git clone  https://github.com/diggerwf/CPU-Miner-mit-System-berwachung.git
 
 2. In das Verzeichnis wechseln:
    cd CPU-Miner-mit-System-berwachung
