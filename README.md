@@ -1,59 +1,51 @@
-Hier ist eine passende Projektbeschreibung (README) für dein GitHub-Repository, das du unter https://github.com/diggerwf/CPU-Miner-mit-System-berwachung hast. Du kannst diese Vorlage in deine README.md einfügen:
-
 CPU-Miner mit Systemüberwachung
+================================
 
-Dieses Repository enthält ein Bash-Skript, das automatisch einen CPU-basierten Kryptowährungs-Miner (SHA256d) auf einem Linux-System installiert, konfiguriert und startet. Zusätzlich wird Netdata installiert, um die Systemleistung in Echtzeit zu überwachen.
+Dieses Projekt enthält ein Bash-Skript, das automatisch einen CPU-basierten Miner (SHA256d) auf einem Linux-System installiert, konfiguriert und startet. Zusätzlich wird Netdata installiert, um die Systemleistung in Echtzeit zu überwachen.
 
 Funktionen
-Automatisierte Systemaktualisierung und -konfiguration
-Installation aller benötigten Abhängigkeiten
-Klonen und Kompilieren des Miners
-Starten des Miners in einer separaten Screen-Session
-Installation von Netdata zur Systemüberwachung
-Voraussetzungen
-Linux-basierte Distribution (z.B. Ubuntu)
-Root- oder sudo-Rechte
-Internetverbindung
+---------
+- Systemaktualisierung und -konfiguration
+- Abhängigkeiten installieren
+- Quellcode des Miners klonen und kompilieren
+- Miner in einer Screen-Session starten
+- Netdata zur Systemüberwachung installieren
+
 Nutzung
-Das Repository klonen:
-git clone https://github.com/diggerwf/CPU-Miner-mit-System-berwachung.git
+-------
+1. Das Repository klonen:
+   git clone https://github.com/diggerwf/CPU-Miner-mit-System-berwachung.git
 
+2. In das Verzeichnis wechseln:
+   cd CPU-Miner-mit-System-berwachung
 
-In das Verzeichnis wechseln:
-cd CPU-Miner-mit-System-berwachung
+3. Das Installationsskript ausführbar machen:
+   chmod +x install_miner.sh
 
-Copy
-Das Installationsskript ausführbar machen:
-chmod +x install_miner.sh
-Copy
-Das Skript ausführen:
-./install_miner.sh
+4. Das Skript ausführen:
+   ./install_miner.sh
 
+Hinweis:
+---------
+Vor der Ausführung solltest du die Platzhalter im Skript `install_miner.sh` anpassen:
 
-Das Skript führt alle Schritte automatisch durch und startet den Miner in einer Screen-Session namens btc-miner.
+- Ersetze `DEINE_WALLET_ADRESSE` durch deine tatsächliche Wallet-Adresse.
+- Ersetze `stratum+tcp://pooladresse:port` durch die Adresse deines Mining-Pools.
 
-Um die Session wieder aufzunehmen:
+Das Skript startet den Miner automatisch in einer Screen-Session namens `btc-miner`. Du kannst die Session mit folgendem Befehl wieder aufnehmen:
 
-screen -r btc-miner
+   screen -r btc-miner
 
+Um die Session zu beenden:
 
-Und um sie zu beenden:
-
-screen -S btc-miner -X quit
+   screen -S btc-miner -X quit
 
 Hinweise
-Passe die Wallet-Adresse (-u) im Startbefehl bei Bedarf an.
-Das Projekt ist offen für Verbesserungen und Anpassungen.
+--------
+- Das Skript setzt voraus, dass du Ubuntu oder eine andere Debian-basierte Distribution verwendest.
+- Für andere Distributionen könnten Anpassungen notwendig sein.
+- Stelle sicher, dass dein System ausreichend Ressourcen für das Mining hat.
+
 Lizenz
-
+------
 Dieses Projekt steht unter MIT-Lizenz / frei verwendbar.
-
-Wenn du möchtest, kann ich dir auch eine kurze Projektbeschreibung für die GitHub-Projektseite formulieren, z.B.:
-
-Kurzbeschreibung:
-"Automatisiertes Setup für CPU-Mining und Systemüberwachung auf Linux."
-
-Lange Beschreibung:
-"Dieses Repository bietet ein Skript, um einen CPU-basierten Miner inklusive Systemüberwachung auf Linux-Systemen einzurichten. Es installiert alle notwendigen Komponenten, konfiguriert den Miner und stellt die Überwachung via Netdata bereit."
-
-Möchtest du noch eine spezielle Version oder zusätzliche Hinweise?
