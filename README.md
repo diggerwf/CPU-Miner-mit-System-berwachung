@@ -30,5 +30,6 @@ Starten mit Optionen:
 ./start_miner.sh -w   # Löscht gespeicherte Wallet/Pools-Daten
 ./start_miner.sh -i   # Fragt Wallet-Adresse und Pool erneut ab
 ./start_miner.sh -wi  # Löscht Daten und fordert neu an
+./start_miner.sh -u   # Überprüft meine Githup seite auf update und macht update nur von meine git hup seite 
 
 
