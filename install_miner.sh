@@ -24,10 +24,11 @@ sudo ./configure
 echo "Bauen..."
 sudo ./build.sh
 
-echo "Miner in einer Screen-Session starten..."
-screen -dmS btc-miner ./cpuminer -a sha256d -o stratum+tcp://public-pool.io:21496 -u 3QyGiLdn9rvP6DKnT5qkYRSuodiRB2VEXi -p x
-
 echo "Netdata installieren (ohne Wartezeit)..."
 bash <(curl -SsL https://my-netdata.io/kickstart.sh) --dont-wait
+
+# Hier starten wir den Miner in einer Screen-Session
+echo "Miner wird jetzt in der Screen-Session 'btc-miner' gestartet..."
+./start_miner.sh
 
 echo "Fertig! Der Miner läuft jetzt in der Screen-Session 'btc-miner'."
