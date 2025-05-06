@@ -24,10 +24,10 @@ Das Installationsskript ausführbar machen:
 chmod +x install_miner.sh
 
 Das Skript ausführen:
-   ./install_miner.sh
-   
-   
-   Die Datei start_miner.sh hat folgende Optionen:
+./install_miner.sh
+
+
+Die Datei start_miner.sh hat folgende Optionen:
 
 -w : Löscht gespeicherte Wallet- und Pool-Daten
 -i : Fragt Wallet-Adresse und Pool erneut ab
