@@ -27,7 +27,11 @@ sudo ./build.sh
 echo "Netdata installieren (ohne Wartezeit)..."
 bash <(curl -SsL https://my-netdata.io/kickstart.sh) --dont-wait
 
-# Hier starten wir den Miner in einer Screen-Session
+# Stelle sicher, dass start_miner.sh ausführbar ist
+echo "Stelle sicher, dass start_miner.sh ausführbar ist..."
+chmod +x start_miner.sh
+
+# Miner in einer Screen-Session starten
 echo "Miner wird jetzt in der Screen-Session 'btc-miner' gestartet..."
 ./start_miner.sh
 
