@@ -30,7 +30,7 @@ Starten mit Optionen:
 ./start_miner.sh -w   # Löscht gespeicherte Wallet/Pools-Daten
 ./start_miner.sh -i   # Fragt Wallet-Adresse und Pool erneut ab
 ./start_miner.sh -wi  # Löscht Daten und fordert neu an
-Copy
+
 
 Hinweis:
 Passe die Platzhalter im Skript install_miner.sh an, z.B.:
@@ -41,12 +41,12 @@ Pool-Adresse (stratum+tcp://pooladresse:port)
 Der Miner läuft in einer Screen-Session namens btc-miner. Um sie wieder aufzunehmen:
 
 screen -r btc-miner
-Copy
+
 
 Beende die Session mit:
 
 screen -S btc-miner -X quit
-Copy
+
 Hinweise
 Funktioniert am besten auf Ubuntu/Debian.
 Stelle sicher, dass dein System ausreichend Ressourcen hat.
