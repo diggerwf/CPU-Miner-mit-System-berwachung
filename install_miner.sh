@@ -27,6 +27,8 @@ sudo ./build.sh
 echo "Netdata installieren (ohne Wartezeit)..."
 bash <(curl -SsL https://my-netdata.io/kickstart.sh) --dont-wait
 
+cd ..
+
 # Stelle sicher, dass start_miner.sh ausführbar ist
 echo "Stelle sicher, dass start_miner.sh ausführbar ist..."
 chmod +x start_miner.sh
