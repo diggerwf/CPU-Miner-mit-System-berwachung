@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Überprüfen, ob der Parameter -u übergeben wurde
+if [ "$1" == "-u" ]; then
+    ./update_miner.sh
+    exit 0
+fi
+
 # Funktion zum Abfragen der Wallet- und Pool-Adresse
 frage_daten() {
     echo "Bitte Wallet-Adresse eingeben:"
@@ -16,7 +22,7 @@ SESSION_NAME="btc-miner"
 MINER_VERZEICHN="$HOME/CPU-Miner-mit-System-berwachung/cpuminer-multi"
 DATA_FILE="user.data"
 
-# Parameterverarbeitung
+# Parameterverarbeitung (bestehender Code)
 if [[ "$1" == "-w" ]]; then
     echo "Lösche gespeicherte Daten..."
     rm -f "$DATA_FILE"
@@ -57,7 +63,6 @@ if screen -list | grep -q "$SESSION_NAME"; then
     echo "Die Screen-Session '$SESSION_NAME' läuft bereits."
 else
     echo "Starte den Miner in einer neuen Screen-Session..."
-
     # In das Verzeichnis wechseln und Miner starten in einer Screen-Session
     cd "$MINER_VERZEICHN" && \
         screen -dmS "$SESSION_NAME" ./cpuminer -a sha256d -o "$POOL_URL" -u "$WALLET_ADDRESS" -p x
