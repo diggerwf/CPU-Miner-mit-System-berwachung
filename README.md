@@ -16,18 +16,18 @@ Nutzung
 
 Das Repository klonen:
    git clone https://github.com/diggerwf/CPU-Miner-mit-System-berwachung.git
-Copy
+   
 In das Verzeichnis wechseln:
    cd CPU-Miner-mit-System-berwachung
-Copy
+   
 Das Installationsskript ausführbar machen:
-   chmod +x install_miner.sh
-Copy
+chmod +x install_miner.sh
+
 Das Skript ausführen:
    ./install_miner.sh
-Copy
-
-Die Datei start_miner.sh hat folgende Optionen:
+   
+   
+   Die Datei start_miner.sh hat folgende Optionen:
 
 -w : Löscht gespeicherte Wallet- und Pool-Daten
 -i : Fragt Wallet-Adresse und Pool erneut ab
