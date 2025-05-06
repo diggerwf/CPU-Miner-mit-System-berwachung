@@ -2,7 +2,8 @@ CPU-Miner mit Systemüberwachung
 
 ================================
 
-Dieses Projekt enthält ein Bash-Skript, das automatisch einen CPU-basierten Miner (SHA256d) auf einem Linux-System installiert, konfiguriert und startet. Zusätzlich wird Netdata installiert, die Systemleistung in Echtzeit zu überwachen.
+Dieses Projekt enthält ein Bash-Skript, das automatisch einen CPU-basierten Miner (SHA256d) auf einem Linux-System installiert,
+konfiguriert und startet. Zusätzlich wird Netdata installiert, die Systemleistung in Echtzeit zu überwachen.
 
 Funktionen
 
@@ -16,15 +17,15 @@ Nutzung
 
 Das Repository klonen:
    git clone https://github.com/diggerwf/CPU-Miner-mit-System-berwachung.git
-   
+
 In das Verzeichnis wechseln:
    cd CPU-Miner-mit-System-berwachung
-   
+
 Das Installationsskript ausführbar machen:
-chmod +x install_miner.sh
+   chmod +x install_miner.sh
 
 Das Skript ausführen:
-./install_miner.sh
+   ./install_miner.sh
 
 
 Die Datei start_miner.sh hat folgende Optionen:
