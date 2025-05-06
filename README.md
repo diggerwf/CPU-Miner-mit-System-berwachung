@@ -12,7 +12,7 @@ Miner in einer Screen-Session laufen lassen
 Netdata zur Systemüberwachung installieren
 Installation
 Repository klonen:
-git clone https://github.com/dein-benutzername/dein-repo-name.git
+sudo apt update && sudo apt install git -y && git clone https://github.com/dein-benutzername/dein-repo-name.git
 
 In das Verzeichnis wechseln:
 cd dein-repo-name
