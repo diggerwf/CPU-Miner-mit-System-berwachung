@@ -26,6 +26,8 @@ ignore_files() {
     # Dateien aus dem Index entfernen (falls vorhanden)
     git rm --cached -r cpuminer-multi/ 2>/dev/null || true
     git rm --cached user.data 2>/dev/null || true
+
+    # Entferne update_miner.sh aus dem Cache, falls vorhanden
     git rm --cached update_miner.sh 2>/dev/null || true
 
     # Änderungen an .gitignore hinzufügen (ohne commit)
@@ -45,6 +47,10 @@ resolve_conflicts() {
 main() {
     echo "=== Miner Update Script ==="
 
+    # Schritt 0: Stelle sicher, dass update_miner.sh nicht im Index ist,
+    # damit es keine Konflikte beim Mergen gibt.
+    git rm --cached update_miner.sh 2>/dev/null || true
+
     # Schritt 1: Dateien ignorieren und in Git eintragen
     echo "[INFO] Vorbereitung: Dateien ignorieren..."
     ignore_files
@@ -53,20 +59,30 @@ main() {
     echo "[INFO] Stashe lokale Änderungen..."
     git stash push -u -k || true
 
-    # Schritt 3: Versuche, den Branch zu pullen und Konflikte automatisch zu lösen
+    # Schritt 3: Nur neueste Änderungen vom Remote holen (fetch)
     echo "[INFO] Hole neueste Änderungen vom Remote..."
-    if ! git pull origin main; then
-        echo "[WARN] Konflikte beim Pull erkannt. Versuche automatische Lösung..."
-        resolve_conflicts
-        # Erneut versuchen, den Pull abzuschließen (falls notwendig)
-        git pull origin main || true
-    fi
+    git fetch origin main
 
-    # Schritt 4: Gestashte Änderungen wiederherstellen
-    echo "[INFO] Wende gestashte Änderungen an..."
-    git stash pop || true
+    # Prüfen, ob der lokale Branch hinter dem Remote ist
+    LOCAL=$(git rev-parse @)
+    REMOTE=$(git rev-parse @{u})
+   BASE=$(git merge-base @ @{u})
 
-    echo "[SUCCESS] Miner wurde erfolgreich aktualisiert."
+   if [ "$LOCAL" = "$REMOTE" ]; then
+       echo "[INFO] Dein Branch ist aktuell. Keine Updates notwendig."
+   elif [ "$LOCAL" = "$BASE" ]; then
+       echo "[INFO] Es gibt neue Änderungen im Remote. Du kannst jetzt 'git merge' oder 'git rebase' durchführen."
+       # Optional: Automatisches Mergen hier aktivieren:
+       # git merge origin/main
+   else
+       echo "[WARN] Dein Branch ist ahead oder diverged. Bitte prüfe den Status."
+   fi
+
+   # Schritt 4: Gestashte Änderungen wiederherstellen
+   echo "[INFO] Wende gestashte Änderungen an..."
+   git stash pop || true
+
+   echo "[SUCCESS] Miner wurde erfolgreich aktualisiert."
 }
 
 # Skript starten
