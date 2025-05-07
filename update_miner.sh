@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Funktion, um bestimmte Dateien/Verzeichnisse zu ignorieren
+# Funktion, um Dateien/Verzeichnisse zu ignorieren
 ignore_files() {
+    # .gitignore erstellen oder ergänzen
     touch .gitignore
 
     if ! grep -qx "cpuminer-multi/" .gitignore; then
@@ -14,26 +15,25 @@ ignore_files() {
         echo "user.data" >> .gitignore
     fi
 
+    # Dateien aus dem Index entfernen (falls vorhanden)
     git rm --cached -r cpuminer-multi/ 2>/dev/null || true
     git rm --cached user.data 2>/dev/null || true
 
+    # Änderungen an .gitignore hinzufügen (ohne commit)
     git add .gitignore
-    git commit -m "Füge cpuminer-multi/ und user.data zu .gitignore hinzu" || true
 }
 
-# Funktion, um Konflikte automatisch zu lösen (ohne Commit)
+# Funktion, um Konflikte automatisch mit 'theirs' zu lösen (ohne commit)
 resolve_conflicts() {
     CONFLICT_FILES=$(git diff --name-only --diff-filter=U)
 
     for file in $CONFLICT_FILES; do
         echo "[INFO] Automatisch löse Konflikt in $file"
-        # Überschreibe mit der Version vom Remote (Theirs)
         git checkout --theirs -- "$file"
         git add "$file"
     done
 }
 
-# Hauptfunktion für das Update-Skript
 main() {
     echo "=== Miner Update Script ==="
 
@@ -43,7 +43,7 @@ main() {
 
     # Schritt 2: Lokale Änderungen stashen (falls vorhanden)
     echo "[INFO] Stashe lokale Änderungen..."
-    git stash push -u -k
+    git stash push -u -k || true
 
     # Schritt 3: Versuche, den Branch zu pullen und Konflikte automatisch zu lösen
     echo "[INFO] Hole neueste Änderungen vom Remote..."
@@ -52,16 +52,16 @@ main() {
         echo "[WARN] Konflikte beim Pull erkannt. Versuche automatische Lösung..."
         resolve_conflicts
 
-        # Nach der Lösung erneut versuchen, den Pull abzuschließen (falls notwendig)
+        # Erneut versuchen, den Pull abzuschließen (falls notwendig)
         git pull origin main || true
     fi
 
-    # Schritt 4: Stash wiederherstellen (falls vorher Änderungen gestasht wurden)
+    # Schritt 4: Gestashte Änderungen wiederherstellen
     echo "[INFO] Wende gestashte Änderungen an..."
     git stash pop || true
 
     echo "[SUCCESS] Miner wurde erfolgreich aktualisiert."
 }
 
-# Script starten
+# Skript starten
 main
