@@ -55,15 +55,17 @@ main() {
     echo "[INFO] Vorbereitung: Dateien ignorieren..."
     ignore_files
 
-    # Schritt 2: Lokale Änderungen stashen (falls vorhanden)
+    # Schritt 2: Stashe lokale Änderungen (inklusive untracked files)
     echo "[INFO] Stashe lokale Änderungen..."
     git stash push -u -k || true
 
-    # Schritt 3: Nur neueste Änderungen vom Remote holen (fetch)
+    # Schritt 3: Neueste Änderungen vom Remote holen (fetch)
     echo "[INFO] Hole neueste Änderungen vom Remote..."
+
+    # Hier führen wir den Pull durch:
+
     git fetch origin main
 
-    # Prüfen, ob der lokale Branch hinter dem Remote ist
     LOCAL=$(git rev-parse @)
     REMOTE=$(git rev-parse @{u})
    BASE=$(git merge-base @ @{u})
@@ -71,16 +73,24 @@ main() {
    if [ "$LOCAL" = "$REMOTE" ]; then
        echo "[INFO] Dein Branch ist aktuell. Keine Updates notwendig."
    elif [ "$LOCAL" = "$BASE" ]; then
-       echo "[INFO] Es gibt neue Änderungen im Remote. Du kannst jetzt 'git merge' oder 'git rebase' durchführen."
-       # Optional: Automatisches Mergen hier aktivieren:
-       # git merge origin/main
+       echo "[INFO] Es gibt neue Änderungen im Remote. Führe Merge durch..."
+       git merge origin/main
    else
        echo "[WARN] Dein Branch ist ahead oder diverged. Bitte prüfe den Status."
    fi
 
    # Schritt 4: Gestashte Änderungen wiederherstellen
    echo "[INFO] Wende gestashte Änderungen an..."
-   git stash pop || true
+
+   # Versuche, gestashte Änderungen wiederherzustellen:
+   if git stash list | grep -q 'WIP on main'; then
+       git stash pop || {
+           echo "[WARN] Konflikte beim Anwenden des Stashes. Löse sie manuell."
+           exit 1
+       }
+   else
+       echo "[INFO] Kein Stash zum Anwenden."
+   fi
 
    echo "[SUCCESS] Miner wurde erfolgreich aktualisiert."
 }
