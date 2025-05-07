@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Selbstberechtigung setzen, falls notwendig
+chmod +x "$0"
+
 REPO_DIR="$HOME/CPU-Miner-mit-System-berwachung"
 BRANCH="main"
 
@@ -8,13 +11,11 @@ cd "$REPO_DIR" || { echo "Verzeichnis nicht gefunden"; exit 1; }
 # Prüfen, ob Änderungen oder untracked Files vorhanden sind
 if ! git diff-index --quiet HEAD -- || [ -n "$(git ls-files --others --exclude-standard)" ]; then
     echo "Änderungen oder untracked Files erkannt."
-
     # Spezifische untracked Datei entfernen (z.B. update_miner.sh)
     if [ -f "update_miner.sh" ]; then
         echo "Entferne spezifische untracked Datei: update_miner.sh"
         rm -f "update_miner.sh"
     fi
-
     # Alternativ: Wenn du andere Dateien entfernen möchtest, füge sie hier hinzu
 fi
 
@@ -27,7 +28,6 @@ fi
 
 # Fetch und Merge
 git fetch origin
-
 LOCAL=$(git rev-parse "$BRANCH")
 REMOTE=$(git rev-parse "origin/$BRANCH")
 
