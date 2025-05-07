@@ -2,6 +2,12 @@
 
 # Überprüfen, ob der Parameter -u übergeben wurde
 if [ "$1" == "-u" ]; then
+    # Prüfen, ob update_miner.sh ausführbar ist
+    if [ ! -x "./update_miner.sh" ]; then
+        echo "update_miner.sh ist nicht ausführbar. Setze Berechtigungen..."
+        chmod +x ./update_miner.sh
+    fi
+    # Update-Skript ausführen
     ./update_miner.sh
     exit 0
 fi
@@ -12,6 +18,7 @@ frage_daten() {
     read -r WALLET_ADDRESS
     echo "Bitte Pool-URL eingeben (z.B. stratum+tcp://public-pool.io:21496):"
     read -r POOL_URL
+
     # Speichern der Daten in der Datei
     echo "WALLET_ADDRESS=\"$WALLET_ADDRESS\"" > "$DATA_FILE"
     echo "POOL_URL=\"$POOL_URL\"" >> "$DATA_FILE"
@@ -63,6 +70,7 @@ if screen -list | grep -q "$SESSION_NAME"; then
     echo "Die Screen-Session '$SESSION_NAME' läuft bereits."
 else
     echo "Starte den Miner in einer neuen Screen-Session..."
+
     # In das Verzeichnis wechseln und Miner starten in einer Screen-Session
     cd "$MINER_VERZEICHN" && \
         screen -dmS "$SESSION_NAME" ./cpuminer -a sha256d -o "$POOL_URL" -u "$WALLET_ADDRESS" -p x
