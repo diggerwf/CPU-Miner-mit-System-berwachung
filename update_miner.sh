@@ -2,28 +2,44 @@
 
 # Funktion, um bestimmte Dateien/Verzeichnisse zu ignorieren
 ignore_files() {
-    # Sicherstellen, dass .gitignore existiert
     touch .gitignore
 
-    # Hinzufügen von cpuminer-multi/ zu .gitignore, falls noch nicht vorhanden
     if ! grep -qx "cpuminer-multi/" .gitignore; then
         echo "Füge 'cpuminer-multi/' zu .gitignore hinzu"
         echo "cpuminer-multi/" >> .gitignore
     fi
 
-    # Hinzufügen von user.data zu .gitignore, falls noch nicht vorhanden
     if ! grep -qx "user.data" .gitignore; then
         echo "Füge 'user.data' zu .gitignore hinzu"
         echo "user.data" >> .gitignore
     fi
 
-    # Entfernen der Dateien/verzeichnisse aus dem Git-Cache, falls sie verfolgt werden
     git rm --cached -r cpuminer-multi/ 2>/dev/null || true
     git rm --cached user.data 2>/dev/null || true
 
-    # Änderungen an .gitignore committen (optional)
     git add .gitignore
     git commit -m "Füge cpuminer-multi/ und user.data zu .gitignore hinzu" || true
+}
+
+# Funktion, um Konflikte in Dateien automatisch zu lösen
+resolve_conflicts() {
+    CONFLICT_FILES=$(git diff --name-only --diff-filter=U)
+
+    for file in $CONFLICT_FILES; do
+        echo "[INFO] Automatisch löse Konflikt in $file"
+
+        # Beispiel: Überschreibe die Datei mit der Version aus dem Remote (falls vorhanden)
+        # Alternativ kannst du hier eine andere Strategie wählen.
+        git checkout --theirs -- "$file"
+
+        # Markiere die Datei als gelöst
+        git add "$file"
+    done
+
+    # Falls es Konflikte gab, committen wir die Lösung
+    if [ -n "$CONFLICT_FILES" ]; then
+        git commit -m "Automatisch gelöste Merge-Konflikte"
+    fi
 }
 
 # Hauptfunktion für das Update-Skript
@@ -38,9 +54,17 @@ main() {
     echo "[INFO] Stashe lokale Änderungen..."
     git stash push -u -k
 
-    # Schritt 3: Aktuellen Branch auf den neuesten Stand bringen
+    # Schritt 3: Versuche, den Branch zu pullen und Konflikte automatisch zu lösen
     echo "[INFO] Hole neueste Änderungen vom Remote..."
-    git pull origin main
+
+    # Versuch, pull durchzuführen; bei Konflikten automatische Lösung aktivieren
+    if ! git pull origin main; then
+        echo "[WARN] Konflikte beim Pull erkannt. Versuche automatische Lösung..."
+        resolve_conflicts
+
+        # Nach der Lösung erneut versuchen, den Pull abzuschließen (falls notwendig)
+        git pull origin main || true
+    fi
 
     # Schritt 4: Stash wiederherstellen (falls vorher Änderungen gestasht wurden)
     echo "[INFO] Wende gestashte Änderungen an..."
