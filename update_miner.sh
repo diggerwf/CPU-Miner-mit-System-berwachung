@@ -9,6 +9,7 @@ resolve_conflicts() {
         git checkout --ours -- update_miner.sh
         git add update_miner.sh
         git commit -m "Automatisch Konflikt in update_miner.sh gelöst"
+        echo "[INFO] Konflikt in update_miner.sh wurde automatisch gelöst und committet."
     fi
 }
 
@@ -19,7 +20,7 @@ main() {
     git stash push -u -- update_miner.sh
 
     # Schritt 2: Dateien ignorieren und in Git eintragen
-    echo "[INFO] Vorbereitung: Dateien ignorieren..."
+    echo "[INFO] Vorbereitung: .gitignore aktualisieren..."
     cat <<EOL > .gitignore
 cpuminer-multi/
 user.data
@@ -46,7 +47,7 @@ EOL
         }
     else
         echo "[WARN] Dein Branch ist ahead oder diverged. Bitte prüfe den Status."
-        # Optional: Hier kannst du weitere Maßnahmen ergreifen.
+        # Optional: Weitere Maßnahmen bei Divergenz.
     fi
 
     # Schritt 4: Gestashte Änderungen wiederherstellen (inklusive update_miner.sh)
@@ -60,6 +61,13 @@ EOL
         resolve_conflicts
     else
         echo "[INFO] Kein Stash zum Anwenden."
+    fi
+
+    # Optional: Alle Änderungen zusammenfassen und finalisieren
+    # Falls noch ungestaged Änderungen bestehen:
+    if ! git diff --cached --quiet; then
+        git commit -am "Automatisierte Aktualisierung inklusive Konfliktlösung"
+        echo "[INFO] Änderungen committet."
     fi
 
     echo "[SUCCESS] Miner wurde erfolgreich aktualisiert."
