@@ -30,17 +30,19 @@ resolve_conflicts() {
     # Prüfe auf Konflikte in update_miner.sh
     CONFLICT_FILES=$(git diff --name-only --diff-filter=U)
     if echo "$CONFLICT_FILES" | grep -q "$FILE_TO_CHECK"; then
-        echo "[INFO] Konflikt in $FILE_TO_CHECK erkannt. Lösung wird mit --theirs angewendet..."
+        echo "[INFO] Konflikt in $FILE_TO_CHECK erkannt. Lösung wird mit --theirs oder Löschung angewendet..."
 
-        # Automatisch Konflikt mit --theirs lösen
-        git checkout --theirs -- "$FILE_TO_CHECK"
-
-        git add "$FILE_TO_CHECK"
-
-        # Commit nur, wenn der Konflikt gelöst wurde
-        git commit -m "Automatisch Konflikt in $FILE_TO_CHECK gelöst mit --theirs"
-
-        echo "[INFO] Konflikt in $FILE_TO_CHECK wurde automatisch mit --theirs gelöst und committet."
+        # Prüfen, ob die Datei gelöscht wurde (Löschkonflikt)
+        if git ls-files --error-unmatch "$FILE_TO_CHECK" > /dev/null 2>&1; then
+            # Datei existiert noch -> Konflikt mit merge, löse mit --theirs
+            git checkout --theirs -- "$FILE_TO_CHECK"
+            git add "$FILE_TO_CHECK"
+            git commit -m "Automatisch Konflikt in $FILE_TO_CHECK gelöst mit --theirs"
+        else
+            # Datei wurde gelöscht -> Konflikt durch Löschen lösen
+            git rm "$FILE_TO_CHECK"
+            git commit -m "Datei $FILE_TO_CHECK aufgrund des Remote-Löschens entfernt"
+        fi
 
         # Miner neu starten nach Konfliktlösung
         ./start_miner.sh -u
@@ -94,6 +96,7 @@ main() {
       if ! git stash pop; then
           echo "[WARN] Fehler beim Anwenden des Stashes. Versuche automatische Konfliktlösung..."
           resolve_conflicts
+          # Erneut versuchen, Stash anzuwenden:
           git stash pop || { 
               echo "[ERROR] Fehler beim Anwenden des Stashes nach Konfliktlösung."; 
               exit 1; 
