@@ -112,11 +112,11 @@ main() {
       echo "[DEBUG] Kein Stash zum Anwenden."
     fi
 
-    # Schritt 5: Alle Änderungen zusammenfassen und finalisieren, falls noch ungestaged Änderungen bestehen:
-    if ! git diff --cached --quiet; then
-      git commit -am "Automatisierte Aktualisierung inklusive Konfliktlösung" || {echo "[ERROR] Commit fehlgeschlagen"; exit 1;}
-      echo "[DEBUG] Änderungen committet."
-    fi
+	# Schritt 5: Alle Änderungen zusammenfassen und finalisieren, falls noch ungestaged Änderungen bestehen:
+	if ! git diff --cached --quiet; then
+		git commit -am "Automatisierte Aktualisierung inklusive Konfliktlösung" || { echo "[ERROR] Commit fehlgeschlagen"; exit 1; }
+		echo "[DEBUG] Änderungen committet."
+	fi
 
     # Miner neu starten am Ende des Updates (falls gewünscht)
     ./start_miner.sh -u || {echo "[ERROR] start_miner.sh konnte nicht ausgeführt werden."; exit 1;}
