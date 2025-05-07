@@ -5,19 +5,28 @@ ignore_files() {
     # .gitignore erstellen oder ergänzen
     touch .gitignore
 
+    # Sicherstellen, dass 'cpuminer-multi/' ignoriert wird
     if ! grep -qx "cpuminer-multi/" .gitignore; then
         echo "Füge 'cpuminer-multi/' zu .gitignore hinzu"
         echo "cpuminer-multi/" >> .gitignore
     fi
 
+    # Sicherstellen, dass 'user.data' ignoriert wird
     if ! grep -qx "user.data" .gitignore; then
         echo "Füge 'user.data' zu .gitignore hinzu"
         echo "user.data" >> .gitignore
     fi
 
+    # Sicherstellen, dass 'update_miner.sh' ignoriert wird
+    if ! grep -qx "update_miner.sh" .gitignore; then
+        echo "Füge 'update_miner.sh' zu .gitignore hinzu"
+        echo "update_miner.sh" >> .gitignore
+    fi
+
     # Dateien aus dem Index entfernen (falls vorhanden)
     git rm --cached -r cpuminer-multi/ 2>/dev/null || true
     git rm --cached user.data 2>/dev/null || true
+    git rm --cached update_miner.sh 2>/dev/null || true
 
     # Änderungen an .gitignore hinzufügen (ohne commit)
     git add .gitignore
@@ -26,7 +35,6 @@ ignore_files() {
 # Funktion, um Konflikte automatisch mit 'theirs' zu lösen (ohne commit)
 resolve_conflicts() {
     CONFLICT_FILES=$(git diff --name-only --diff-filter=U)
-
     for file in $CONFLICT_FILES; do
         echo "[INFO] Automatisch löse Konflikt in $file"
         git checkout --theirs -- "$file"
@@ -47,11 +55,9 @@ main() {
 
     # Schritt 3: Versuche, den Branch zu pullen und Konflikte automatisch zu lösen
     echo "[INFO] Hole neueste Änderungen vom Remote..."
-
     if ! git pull origin main; then
         echo "[WARN] Konflikte beim Pull erkannt. Versuche automatische Lösung..."
         resolve_conflicts
-
         # Erneut versuchen, den Pull abzuschließen (falls notwendig)
         git pull origin main || true
     fi
