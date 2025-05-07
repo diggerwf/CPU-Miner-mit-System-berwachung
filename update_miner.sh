@@ -1,9 +1,11 @@
 #!/bin/bash
 
+# Variablen
 USER_FILE="user.git"
 FILE_TO_CHECK="update_miner.sh"
 BRANCH="main"
 
+# Funktion: Git-User-Daten laden oder setzen
 setup_git_user() {
     if [ ! -f "$USER_FILE" ]; then
         echo "[INFO] $USER_FILE nicht gefunden. Bitte gib deine Git-Benutzerdaten ein."
@@ -26,20 +28,20 @@ setup_git_user() {
     fi
 }
 
+# Funktion: Konflikte automatisch lösen (inkl. Löschkonflikte)
 resolve_conflicts() {
-    # Prüfe auf Konflikte in update_miner.sh
     CONFLICT_FILES=$(git diff --name-only --diff-filter=U)
     if echo "$CONFLICT_FILES" | grep -q "$FILE_TO_CHECK"; then
         echo "[INFO] Konflikt in $FILE_TO_CHECK erkannt. Lösung wird mit --theirs oder Löschung angewendet..."
 
-        # Prüfen, ob die Datei gelöscht wurde (Löschkonflikt)
+        # Prüfen, ob die Datei im Index vorhanden ist (nicht gelöscht)
         if git ls-files --error-unmatch "$FILE_TO_CHECK" > /dev/null 2>&1; then
-            # Datei existiert noch -> Konflikt mit merge, löse mit --theirs
+            # Datei existiert noch -> löse mit --theirs
             git checkout --theirs -- "$FILE_TO_CHECK"
             git add "$FILE_TO_CHECK"
             git commit -m "Automatisch Konflikt in $FILE_TO_CHECK gelöst mit --theirs"
         else
-            # Datei wurde gelöscht -> Konflikt durch Löschen lösen
+            # Datei wurde gelöscht -> lösche sie auch lokal
             git rm "$FILE_TO_CHECK"
             git commit -m "Datei $FILE_TO_CHECK aufgrund des Remote-Löschens entfernt"
         fi
@@ -49,13 +51,15 @@ resolve_conflicts() {
     fi
 }
 
+# Hauptfunktion
 main() {
     echo "=== Miner Update Script ==="
 
+    # Schritt 1: Git-User-Daten setzen/laden
     setup_git_user
 
     # Schritt 2: Änderungen an update_miner.sh sichern (falls vorhanden)
-    if git status --porcelain | grep -q "$FILE_TO_CHECK"; then
+    if git status --porcelain | grep -q "^ M\?$FILE_TO_CHECK"; then
       echo "[INFO] Sichern der Änderungen an $FILE_TO_CHECK..."
       git stash push -u -- "$FILE_TO_CHECK"
       STASHED=1
@@ -63,7 +67,7 @@ main() {
       STASHED=0
     fi
 
-    # Schritt 4: Neueste Änderungen vom Remote holen (fetch + merge)
+    # Schritt 3: Neueste Änderungen vom Remote holen (fetch + merge)
     echo "[INFO] Hole neueste Änderungen vom Remote..."
     git fetch origin $BRANCH
 
@@ -79,7 +83,7 @@ main() {
         if ! git merge origin/$BRANCH; then 
             echo "[WARN] Merge-Konflikte erkannt. Versuche automatische Lösung..."
             resolve_conflicts
-            # Nach Lösung erneut versuchen zu mergen, falls notwendig:
+            # Nach Konfliktlösung erneut versuchen zu mergen:
             git merge origin/$BRANCH || { 
                 echo "[ERROR] Merge konnte nicht abgeschlossen werden."; 
                 exit 1; 
@@ -90,7 +94,7 @@ main() {
         echo "[WARN] Dein Branch ist ahead oder diverged. Bitte prüfe den Status."
     fi
 
-    # Schritt 5: Gestashte Änderungen wiederherstellen (inklusive update_miner.sh)
+    # Schritt 4: Gestashte Änderungen wiederherstellen (inklusive update_miner.sh)
     if [ $STASHED -eq 1 ]; then
       echo "[INFO] Wende gestashte Änderungen an..."
       if ! git stash pop; then
@@ -110,7 +114,7 @@ main() {
       echo "[INFO] Kein Stash zum Anwenden."
     fi
 
-    # Optional: Alle Änderungen zusammenfassen und finalisieren, falls noch ungestaged Änderungen bestehen:
+    # Schritt 5: Alle Änderungen zusammenfassen und finalisieren, falls noch ungestaged Änderungen bestehen:
     if ! git diff --cached --quiet; then
       git commit -am "Automatisierte Aktualisierung inklusive Konfliktlösung"
       echo "[INFO] Änderungen committet."
@@ -122,4 +126,5 @@ main() {
     echo "[SUCCESS] Miner wurde erfolgreich aktualisiert."
 }
 
+# Skript starten
 main "$@"
