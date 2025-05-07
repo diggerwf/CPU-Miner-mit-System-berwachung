@@ -5,7 +5,7 @@ REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$REPO_DIR" || exit
 
 # Remote-Repository URL
-REMOTE_URL="https://github.com/diggerwf/Updater.git"
+REMOTE_URL="https://github.com/diggerwf/CPU-Miner-mit-System-berwachung.git"
 BRANCH="main"
 
 # Dateien
