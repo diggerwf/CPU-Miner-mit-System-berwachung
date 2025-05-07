@@ -34,35 +34,19 @@ ignore_files() {
     git add .gitignore
 }
 
-# Funktion, um Konflikte automatisch mit 'theirs' zu lösen (ohne commit)
-resolve_conflicts() {
-    CONFLICT_FILES=$(git diff --name-only --diff-filter=U)
-    for file in $CONFLICT_FILES; do
-        echo "[INFO] Automatisch löse Konflikt in $file"
-        git checkout --theirs -- "$file"
-        git add "$file"
-    done
-}
-
 main() {
     echo "=== Miner Update Script ==="
 
-    # Schritt 0: Stelle sicher, dass update_miner.sh nicht im Index ist,
-    # damit es keine Konflikte beim Mergen gibt.
-    git rm --cached update_miner.sh 2>/dev/null || true
+    # Schritt 1: Sicherstellen, dass update_miner.sh nicht im Stash bleibt
+    echo "[INFO] Sichern der Änderungen an update_miner.sh..."
+    git stash push -u -- update_miner.sh
 
-    # Schritt 1: Dateien ignorieren und in Git eintragen
+    # Schritt 2: Dateien ignorieren und in Git eintragen
     echo "[INFO] Vorbereitung: Dateien ignorieren..."
     ignore_files
 
-    # Schritt 2: Stashe lokale Änderungen (inklusive untracked files)
-    echo "[INFO] Stashe lokale Änderungen..."
-    git stash push -u -k || true
-
-    # Schritt 3: Neueste Änderungen vom Remote holen (fetch)
+    # Schritt 3: Neueste Änderungen vom Remote holen (fetch + merge)
     echo "[INFO] Hole neueste Änderungen vom Remote..."
-
-    # Hier führen wir den Pull durch:
 
     git fetch origin main
 
@@ -73,16 +57,15 @@ main() {
    if [ "$LOCAL" = "$REMOTE" ]; then
        echo "[INFO] Dein Branch ist aktuell. Keine Updates notwendig."
    elif [ "$LOCAL" = "$BASE" ]; then
-       echo "[INFO] Es gibt neue Änderungen im Remote. Führe Merge durch..."
+       echo "[INFO] Es gibt neue Änderungen im Remote. Merge wird durchgeführt..."
        git merge origin/main
    else
        echo "[WARN] Dein Branch ist ahead oder diverged. Bitte prüfe den Status."
    fi
 
-   # Schritt 4: Gestashte Änderungen wiederherstellen
+   # Schritt 4: Gestashte Änderungen wiederherstellen (inklusive update_miner.sh)
    echo "[INFO] Wende gestashte Änderungen an..."
 
-   # Versuche, gestashte Änderungen wiederherzustellen:
    if git stash list | grep -q 'WIP on main'; then
        git stash pop || {
            echo "[WARN] Konflikte beim Anwenden des Stashes. Löse sie manuell."
