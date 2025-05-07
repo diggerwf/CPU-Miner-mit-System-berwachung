@@ -1,5 +1,3 @@
-Hier ist eine kurze Vorlage, wie du dein README für ein GitHub-Repository (https://github.com/) gestalten kannst. Du kannst den Text einfach kopieren und anpassen:
-
 Mein CPU-Miner mit Systemüberwachung
 
 Dieses Projekt enthält Skripte, um einen CPU-basierten Miner (SHA256d) auf einem Linux-System zu installieren und zu starten, inklusive Systemüberwachung mit Netdata.
