@@ -2,23 +2,34 @@
 
 # Funktion zum automatischen Lösen von Konflikten
 resolve_conflicts() {
+    # Prüfen, ob Konflikte bestehen
     CONFLICT_FILES=$(git diff --name-only --diff-filter=U)
-    for file in $CONFLICT_FILES; do
-        if [ "$file" == "update_miner.sh" ]; then
-            echo "[INFO] Konflikt in $file - behalte lokale Version..."
-            git checkout --ours -- "$file"
-            git add "$file"
-        else
-            echo "[INFO] Konflikt in $file - löse manuell."
-        fi
-    done
+    if echo "$CONFLICT_FILES" | grep -q 'update_miner.sh'; then
+        echo "[INFO] Konflikt in update_miner.sh erkannt. Lösung wird angewendet..."
+        git checkout --ours -- update_miner.sh
+        git add update_miner.sh
+        git commit -m "Automatisch Konflikt in update_miner.sh gelöst"
+    fi
 }
 
 main() {
-    # Sicherstellen, dass update_miner.sh nicht im Stash bleibt
+    echo "=== Miner Update Script ==="
+
+    # Schritt 1: Änderungen an update_miner.sh sichern (falls vorhanden)
     git stash push -u -- update_miner.sh
 
-    # Pull durchführen (wie vorher)
+    # Schritt 2: Dateien ignorieren und in Git eintragen
+    echo "[INFO] Vorbereitung: Dateien ignorieren..."
+    cat <<EOL > .gitignore
+cpuminer-multi/
+user.data
+update_miner.sh
+EOL
+    git add .gitignore
+
+    # Schritt 3: Neueste Änderungen vom Remote holen (fetch + merge)
+    echo "[INFO] Hole neueste Änderungen vom Remote..."
+
     git fetch origin main
 
     LOCAL=$(git rev-parse @)
@@ -28,23 +39,31 @@ main() {
     if [ "$LOCAL" = "$REMOTE" ]; then
         echo "[INFO] Dein Branch ist aktuell."
     elif [ "$LOCAL" = "$BASE" ]; then
-        echo "[INFO] Merge wird durchgeführt..."
-        git merge origin/main
+        echo "[INFO] Es gibt neue Änderungen im Remote. Merge wird durchgeführt..."
+        git merge origin/main || {
+            echo "[WARN] Merge-Konflikte erkannt. Versuche automatische Lösung..."
+            resolve_conflicts
+        }
     else
-        echo "[WARN] Divergenz erkannt."
+        echo "[WARN] Dein Branch ist ahead oder diverged. Bitte prüfe den Status."
+        # Optional: Hier kannst du weitere Maßnahmen ergreifen.
     fi
 
-    # Stash wieder anwenden und Konflikte lösen
+    # Schritt 4: Gestashte Änderungen wiederherstellen (inklusive update_miner.sh)
     if git stash list | grep -q 'WIP on main'; then
+        echo "[INFO] Wende gestashte Änderungen an..."
         git stash pop || {
             echo "[WARN] Fehler beim Anwenden des Stashes."
+            exit 1
         }
+        # Konflikte in update_miner.sh automatisch lösen, falls vorhanden
         resolve_conflicts
     else
         echo "[INFO] Kein Stash zum Anwenden."
     fi
 
-    echo "[SUCCESS] Update abgeschlossen."
+    echo "[SUCCESS] Miner wurde erfolgreich aktualisiert."
 }
 
+# Skript starten
 main
