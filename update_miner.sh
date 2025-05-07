@@ -21,25 +21,16 @@ ignore_files() {
     git commit -m "Füge cpuminer-multi/ und user.data zu .gitignore hinzu" || true
 }
 
-# Funktion, um Konflikte in Dateien automatisch zu lösen
+# Funktion, um Konflikte automatisch zu lösen (ohne Commit)
 resolve_conflicts() {
     CONFLICT_FILES=$(git diff --name-only --diff-filter=U)
 
     for file in $CONFLICT_FILES; do
         echo "[INFO] Automatisch löse Konflikt in $file"
-
-        # Beispiel: Überschreibe die Datei mit der Version aus dem Remote (falls vorhanden)
-        # Alternativ kannst du hier eine andere Strategie wählen.
+        # Überschreibe mit der Version vom Remote (Theirs)
         git checkout --theirs -- "$file"
-
-        # Markiere die Datei als gelöst
         git add "$file"
     done
-
-    # Falls es Konflikte gab, committen wir die Lösung
-    if [ -n "$CONFLICT_FILES" ]; then
-        git commit -m "Automatisch gelöste Merge-Konflikte"
-    fi
 }
 
 # Hauptfunktion für das Update-Skript
@@ -57,7 +48,6 @@ main() {
     # Schritt 3: Versuche, den Branch zu pullen und Konflikte automatisch zu lösen
     echo "[INFO] Hole neueste Änderungen vom Remote..."
 
-    # Versuch, pull durchzuführen; bei Konflikten automatische Lösung aktivieren
     if ! git pull origin main; then
         echo "[WARN] Konflikte beim Pull erkannt. Versuche automatische Lösung..."
         resolve_conflicts
