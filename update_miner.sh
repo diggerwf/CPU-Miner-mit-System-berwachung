@@ -17,10 +17,8 @@ fi
 # Prüfen, ob Änderungen oder untracked Files vorhanden sind
 if ! git diff-index --quiet HEAD -- || [ -n "$(git ls-files --others --exclude-standard)" ]; then
     echo "Änderungen oder untracked Files erkannt."
-    if [ -f "update_miner.sh" ]; then
-        echo "Entferne spezifische untracked Datei: update_miner.sh"
-        rm -f "update_miner.sh"
-    fi
+    # Entferne oder kommentiere die folgende Zeile, wenn du nicht möchtest, dass update_miner.sh gelöscht wird:
+    # rm -f "update_miner.sh"
 fi
 
 # Stashen bei lokalen Änderungen
