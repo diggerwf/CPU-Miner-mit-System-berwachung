@@ -59,33 +59,30 @@ resolve_conflicts() {
     fi
 }
 
-# Hauptfunktion
 main() {
     echo "=== Miner Update Script ==="
-
     # Schritt 1: Git-User-Daten setzen/laden
     setup_git_user
 
     # Schritt 2: Änderungen an update_miner.sh sichern (falls vorhanden)
     if git status --porcelain | grep -q "^ M\?$FILE_TO_CHECK"; then
-      echo "[DEBUG] Sichern der Änderungen an $FILE_TO_CHECK..."
-      git stash push -u -- "$FILE_TO_CHECK" || { echo "[ERROR] Stash konnte nicht erstellt werden."; exit 1; }
-      STASHED=1
+        echo "[DEBUG] Sichern der Änderungen an $FILE_TO_CHECK..."
+        git stash push -u -- "$FILE_TO_CHECK" || { echo "[ERROR] Stash konnte nicht erstellt werden."; exit 1; }
+        STASHED=1
     else
-      STASHED=0
+        STASHED=0
     fi
 
-    # Schritt 3: Neueste Änderungen vom Remote holen (fetch + merge) mit Debug-Ausgaben und Fehlerüberprüfung
+    # Schritt 3: Neueste Änderungen vom Remote holen (fetch + merge)
     echo "[DEBUG] Hole neueste Änderungen vom Remote..."
     git fetch origin || { echo "[ERROR] Fetch vom Remote fehlgeschlagen."; exit 1; }
 
     echo "[DEBUG] Merge branch..."
-    if ! git merge origin/$BRANCH; then 
+    if ! git merge origin/$BRANCH; then
         echo "[WARN] Merge-Konflikte erkannt. Versuche automatische Lösung..."
         resolve_conflicts
-
         # Nach Konfliktlösung erneut versuchen zu mergen:
-        if ! git merge origin/$BRANCH; then 
+        if ! git merge origin/$BRANCH; then
             echo "[ERROR] Merge konnte nach Konfliktlösung nicht abgeschlossen werden."
             exit 1
         fi
@@ -93,36 +90,27 @@ main() {
 
     # Schritt 4: Gestashte Änderungen wiederherstellen (inklusive update_miner.sh)
     if [ $STASHED -eq 1 ]; then
-      echo "[DEBUG] Wende gestashte Änderungen an..."
-      if ! git stash pop; then
-          echo "[WARN] Fehler beim Anwenden des Stashes. Versuche automatische Konfliktlösung..."
-          resolve_conflicts
-
-          # Erneut versuchen, Stash anzuwenden:
-          git stash pop || { 
-              echo "[ERROR] Fehler beim Anwenden des Stashes nach Konfliktlösung."; 
-              exit 1; 
-          }
-      fi
-
-      # Falls noch Konflikte bestehen, nochmal prüfen und lösen:
-      resolve_conflicts
-
+        echo "[DEBUG] Wende gestashte Änderungen an..."
+        if ! git stash pop; then
+            echo "[WARN] Fehler beim Anwenden des Stashes. Versuche automatische Konfliktlösung..."
+            resolve_conflicts
+            # Erneut versuchen, Stash anzuwenden:
+            git stash pop || { echo "[ERROR] Fehler beim Anwenden des Stashes nach Konfliktlösung."; exit 1; }
+        fi
     else
-      echo "[DEBUG] Kein Stash zum Anwenden."
+        echo "[DEBUG] Kein Stash zum Anwenden."
     fi
 
-	# Schritt 5: Alle Änderungen zusammenfassen und finalisieren, falls noch ungestaged Änderungen bestehen:
-	if ! git diff --cached --quiet; then
-		git commit -am "Automatisierte Aktualisierung inklusive Konfliktlösung" || { echo "[ERROR] Commit fehlgeschlagen"; exit 1; }
-		echo "[DEBUG] Änderungen committet."
-	fi
+    # Schritt 5: Alle Änderungen zusammenfassen und finalisieren, falls noch ungestaged Änderungen bestehen:
+    if ! git diff --cached --quiet; then
+        git commit -am "Automatisierte Aktualisierung inklusive Konfliktlösung" || { echo "[ERROR] Commit fehlgeschlagen"; exit 1; }
+        echo "[DEBUG] Änderungen committet."
+    fi
 
     # Miner neu starten am Ende des Updates (falls gewünscht)
     ./start_miner.sh -u || {echo "[ERROR] start_miner.sh konnte nicht ausgeführt werden."; exit 1;}
-
     echo "[SUCCESS] Miner wurde erfolgreich aktualisiert."
-}
+} # Hier wird die Funktion korrekt geschlossen
 
 # Skript starten mit Fehlerbehandlung für unerwartete Probleme:
 main "$@"
