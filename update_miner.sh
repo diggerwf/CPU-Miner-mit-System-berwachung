@@ -87,53 +87,30 @@ EOL
     REMOTE=$(git rev-parse @{u})
     BASE=$(git merge-base @ @{u})
 
-<<<<<<< Updated upstream
-    if [ "$LOCAL" = "$REMOTE" ]; then
-        echo "[INFO] Dein Branch ist aktuell."
-    elif [ "$LOCAL" = "$BASE" ]; then
-        echo "[INFO] Es gibt neue Änderungen im Remote. Merge wird durchgeführt..."
-        git merge origin/main || {
-            echo "[WARN] Merge-Konflikte erkannt. Versuche automatische Lösung..."
-            resolve_conflicts
-        }
-    else
-        echo "[WARN] Dein Branch ist ahead oder diverged. Bitte prüfe den Status."
-    fi
-
-    # Schritt 5: Gestashte Änderungen wiederherstellen (inklusive update_miner.sh)
-    if git stash list | grep -q 'WIP on main'; then
-        echo "[INFO] Wende gestashte Änderungen an..."
-        git stash pop || {
-            echo "[WARN] Fehler beim Anwenden des Stashes."
-            exit 1
-        }
-        # Konflikte in update_miner.sh automatisch lösen, falls vorhanden
+if [ "$LOCAL" = "$REMOTE" ]; then
+    echo "[INFO] Dein Branch ist aktuell."
+elif [ "$LOCAL" = "$BASE" ]; then
+    echo "[INFO] Es gibt neue Änderungen im Remote. Merge wird durchgeführt..."
+    git merge origin/main || {
+        echo "[WARN] Merge-Konflikte erkannt. Versuche automatische Lösung..."
         resolve_conflicts
-    else
-        echo "[INFO] Kein Stash zum Anwenden."
-    fi
-=======
-   if [ "$LOCAL" = "$REMOTE" ]; then
-       echo "[INFO] Dein Branch ist aktuell. Keine Updates notwendig."
-   elif [ "$LOCAL" = "$BASE" ]; then
-       echo "[INFO] Es gibt neue Änderungen im Remote. Merge wird durchgeführt..."
-       git merge origin/main
-   else
-       echo "[WARN] Dein Branch ist ahead oder diverged. Bitte prüfe den Status."
-   fi
+    }
+else
+    echo "[WARN] Dein Branch ist ahead oder diverged. Bitte prüfe den Status."
+fi
 
-   # Schritt 4: Gestashte Änderungen wiederherstellen (inklusive update_miner.sh)
-   echo "[INFO] Wende gestashte Änderungen an..."
-
-   if git stash list | grep -q 'WIP on main'; then
-       git stash pop || {
-           echo "[WARN] Konflikte beim Anwenden des Stashes. Löse sie manuell."
-           exit 1
-       }
-   else
-       echo "[INFO] Kein Stash zum Anwenden."
-   fi
->>>>>>> Stashed changes
+# Schritt 5: Gestashte Änderungen wiederherstellen (inklusive update_miner.sh)
+if git stash list | grep -q 'WIP on main'; then
+    echo "[INFO] Wende gestashte Änderungen an..."
+    git stash pop || {
+        echo "[WARN] Fehler beim Anwenden des Stashes."
+        exit 1
+    }
+    # Konflikte in update_miner.sh automatisch lösen, falls vorhanden
+    resolve_conflicts
+else
+    echo "[INFO] Kein Stash zum Anwenden."
+fi
 
     # Optional: Alle Änderungen zusammenfassen und finalisieren, falls noch ungestaged Änderungen bestehen:
     if ! git diff --cached --quiet; then
