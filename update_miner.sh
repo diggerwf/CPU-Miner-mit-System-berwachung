@@ -2,7 +2,6 @@
 
 # Pfad zum lokalen Repository
 REPO_DIR="$HOME/CPU-Miner-mit-System-berwachung"
-
 # Branch, den du verwendest (z.B. main)
 BRANCH="main"
 
@@ -12,12 +11,19 @@ if [ ! -d "$REPO_DIR" ]; then
     git clone https://github.com/diggerwf/CPU-Miner-mit-System-berwachung.git "$REPO_DIR"
 else
     echo "Repository gefunden. Überprüfe auf Updates..."
-    cd "$REPO_DIR"
+    cd "$REPO_DIR" || { echo "Konnte Verzeichnis nicht wechseln"; exit 1; }
+
+    # Änderungen stashen, falls vorhanden
+    if ! git diff-index --quiet HEAD --; then
+        echo "Änderungen erkannt. Stashe sie temporär..."
+        git stash save "Automatisches Stash vor Update"
+        STASHED=true
+    fi
 
     # Fetch die neuesten Änderungen vom Remote
     git fetch origin
 
-    # Hole die Commit-IDs
+    # Vergleiche lokale und remote Commit-IDs
     LOCAL=$(git rev-parse "$BRANCH")
     REMOTE=$(git rev-parse "origin/$BRANCH")
 
@@ -27,7 +33,13 @@ else
         echo "Neue Version verfügbar! Aktualisiere..."
         git pull origin "$BRANCH"
         # Optional: Miner neu starten oder andere Aktionen ausführen
-        # z.B. systemctl restart miner.service
+        # z.B.: systemctl restart miner.service
         echo "Update abgeschlossen."
+    fi
+
+    # Wenn Änderungen gestasht wurden, wiederherstellen
+    if [ "$STASHED" = true ]; then
+        echo "Stash wiederherstellen..."
+        git stash pop
     fi
 fi
