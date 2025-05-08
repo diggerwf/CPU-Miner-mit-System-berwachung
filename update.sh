@@ -31,7 +31,7 @@ get_remote_hash() {
 
 cd "$REPO_DIR" || { echo "Verzeichnis nicht gefunden"; exit 1; }
 
-# Schritt 1: Markiere ignorierte Dateien/Ordner als 'assume unchanged'
+# Schritt 1: Ignorierte Dateien/Ordner auf 'assume unchanged' setzen
 echo "Setze ignorierte Dateien/Ordner auf 'assume unchanged'..."
 for item in "${IGNORE_LIST[@]}"; do
     if [ -e "$item" ]; then
@@ -50,7 +50,8 @@ if [ -d "$REPO_DIR/.git" ]; then
 
     if [ "$LOCAL_HASH" != "$REMOTE_HASH" ]; then
         echo "Neues Update erkannt. Aktualisiere..."
-        # Backup des eigenen update.sh vor dem Pullen (optional)
+
+        # Backup des eigenen update.sh vor dem Pull (optional)
         cp "$UPDATE_SCRIPT" "$TEMP_UPDATE_SCRIPT"
 
         # Pull die neuesten Änderungen vom Remote-Branch
@@ -83,7 +84,7 @@ else
     git clone "$REPO_URL" "$REPO_DIR"
 fi
 
-# Script immer ausführbar machen
+# Script immer ausführbar machen (falls noch nicht)
 chmod +x "$UPDATE_SCRIPT"
 
 echo "Update abgeschlossen oder kein Update erforderlich."
