@@ -1,74 +1,100 @@
 #!/bin/bash
 
-# Pfad zum Repository (aktueller Ordner)
-REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$REPO_DIR" || exit
-
-# Remote-Repository URL
-REMOTE_URL="https://github.com/diggerwf/CPU-Miner-mit-System-berwachung.git"
+# ==========================
+# Konfiguration
+# ==========================
+# Repository-URL und Branch
+REPO_URL="https://github.com/diggerwf/CPU-Miner-mit-System-berwachung.git"
 BRANCH="main"
 
-# Dateien
+# Pfad zum aktuellen Verzeichnis (wo das Skript liegt)
+REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Name des Skripts (damit es sich selbst aktualisieren kann)
 UPDATE_SCRIPT="$REPO_DIR/update.sh"
 TEMP_UPDATE_SCRIPT="$REPO_DIR/update.sh.2"
 
-# Funktion, um den aktuellen Commit-Hash zu bekommen
+# Liste der Dateien/Ordner, die beim Update ignoriert werden sollen
+IGNORE_LIST=("config.ini" "local_data/" "meine_konfig/")
+
+# ==========================
+# Funktionen
+# ==========================
+
+# Funktion: Hash des aktuellen Repos holen
 get_current_hash() {
     git rev-parse HEAD 2>/dev/null
 }
 
-# Funktion, um den Remote-Commit-Hash zu bekommen
+# Funktion: Hash des Remote-Repos holen
 get_remote_hash() {
-    git ls-remote "$REMOTE_URL" "$BRANCH" | awk '{print $1}'
+    git ls-remote "$REPO_URL" "$BRANCH" | awk '{print $1}'
 }
 
-# Prüfen, ob das Repository vorhanden ist
+# ==========================
+# Hauptlogik
+# ==========================
+
+cd "$REPO_DIR" || { echo "Verzeichnis nicht gefunden"; exit 1; }
+
+# Schritt 1: Sicherung der ignorierten Dateien/Ordner vor dem Update
+echo "Sicherung der ignorierten Dateien/Ordner..."
+for item in "${IGNORE_LIST[@]}"; do
+    if [ -e "$item" ]; then
+        cp -r "$item" "$item".backup
+        echo "Gesichert: $item"
+    fi
+done
+
+# Schritt 2: Repository aktualisieren oder klonen
 if [ -d "$REPO_DIR/.git" ]; then
     echo "Repository gefunden. Prüfe auf Updates..."
-    cd "$REPO_DIR" || exit
-
-    # Lokale Änderungen verwerfen (Vorsicht!)
-    echo "Verwerfe lokale Änderungen..."
+    # Hard Reset, um lokale Änderungen zu verwerfen
     git reset --hard
 
-    # Hole den neuesten Stand vom Remote
-    echo "Hole neueste Änderungen vom Remote..."
+    # Fetch vom Remote-Repository
     git fetch origin
 
     LOCAL_HASH=$(get_current_hash)
     REMOTE_HASH=$(get_remote_hash)
 
     if [ "$LOCAL_HASH" != "$REMOTE_HASH" ]; then
-        echo "Update für update.sh erkannt."
-
-        # Kopiere die aktuelle update.sh nach update.sh.2
+        echo "Neues Update erkannt. Aktualisiere..."
+        # Backup des eigenen update.sh vor dem Pullen
         cp "$UPDATE_SCRIPT" "$TEMP_UPDATE_SCRIPT"
 
-        # Aktualisiere update.sh durch den Pull vom Remote
-        echo "Aktualisiere update.sh..."
+        # Pull die neuesten Änderungen vom Remote-Branch
         git pull origin "$BRANCH"
 
-        # Stelle sicher, dass update.sh ausführbar ist
+        # Stelle sicher, dass das Script weiterhin ausführbar ist
         chmod +x "$UPDATE_SCRIPT"
 
-        # Führe die neue update.sh aus (rekursiv)
+        # Führe das aktualisierte Script erneut aus (Self-Update)
         bash "$UPDATE_SCRIPT"
 
-        # Lösche temporäre Datei
+        # Nach dem Update: Wiederherstellen der ignorierten Dateien/Ordner
+        echo "Wiederherstellen der ignorierten Dateien/Ordner..."
+        for item in "${IGNORE_LIST[@]}"; do
+            if [ -e "$item".backup ]; then
+                rm -rf "$item"
+                mv "$item".backup "$item"
+                echo "Wiederhergestellt: $item"
+            fi
+        done
+
+        # Entferne temporäre Backup-Datei des Scripts
         rm -f "$TEMP_UPDATE_SCRIPT"
 
-        # Beende das aktuelle Skript, da die neue Version jetzt läuft
         exit 0
     else
         echo "Das Repository ist bereits aktuell."
     fi
 else
-    # Falls das Repository nicht existiert, klone es neu
     echo "Repository nicht gefunden. Klone es..."
-    git clone "$REMOTE_URL" "$REPO_DIR"
+    git clone "$REPO_URL" "$REPO_DIR"
 fi
 
-# Stelle sicher, dass update.sh immer ausführbar ist (am Ende des Skripts)
+# Schritt 3: Sicherstellen, dass das Script immer ausführbar ist
 chmod +x "$UPDATE_SCRIPT"
 
 echo "Update abgeschlossen oder kein Update erforderlich."
