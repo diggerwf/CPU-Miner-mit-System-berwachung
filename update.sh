@@ -15,7 +15,7 @@ UPDATE_SCRIPT="$REPO_DIR/update.sh"
 TEMP_UPDATE_SCRIPT="$REPO_DIR/update.sh.2"
 
 # Liste der Dateien/Ordner, die beim Update ignoriert werden sollen
-IGNORE_LIST=("cpuminer-multi/" "user.data" "meine_konfig/")
+IGNORE_LIST=("cpuminer-multi/" "user.data")
 
 # ==========================
 # Funktionen
